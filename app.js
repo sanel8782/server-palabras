@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const path = require('path');
-const db = require("./db")
+const db = require("./db2")
 const cors = require("cors");
 
 
@@ -18,23 +18,15 @@ app.get("/api/textos", listaTextos);
 
 
 //insertando un registro en la tabla texto
-app.post("/api/textos", (req, res) => {
+app.post("/api/textos", async (req, res) => {
 
-  const sqlQuery = "INSERT INTO texto (contenido, tipo) VALUES (?, ?)";
+  const sqlQuery = "INSERT INTO texto (contenido, tipo) VALUES ($1, $2) RETURNING *"
   const contenido = req.body.contenido;
   const tipo = req.body.tipo;
 
-  db.query(sqlQuery, [contenido, tipo], (error, resultado) => {
+  const result = await db.query(sqlQuery, [contenido, tipo])
+  res.status(201).json(result.rows[0]); // 🔥 clave
 
-    if (error) {
-      console.error("Error al insertar:", error);
-      return;
-    }
-
-    console.log("Registro insertado");
-    console.log("ID generado:", resultado.insertId);
-
-  });
 });
 
 app.listen(port, () => {
@@ -43,15 +35,9 @@ app.listen(port, () => {
 
 
 
-function listaTextos(req, res) {
-    db.query("SELECT * FROM texto", (error, resultados) => {
+async function listaTextos(req, res) {
 
-      if (error) {
-        console.error(error);
-        return;
-      }
+  const result = await db.query("SELECT * FROM texto")
+  res.json(result.rows);
 
-      console.log(resultados);
-      res.json(resultados);
-    });
-  }
+}
