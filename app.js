@@ -20,11 +20,13 @@ app.get("/api/textos", listaTextos);
 //insertando un registro en la tabla texto
 app.post("/api/textos", async (req, res) => {
 
-  const sqlQuery = "INSERT INTO texto (contenido, tipo) VALUES ($1, $2) RETURNING *"
+  const sqlQuery = "INSERT INTO texto (contenido, tipo, usuario) VALUES ($1, $2, $3) RETURNING *"
+  // const sqlQuery = "INSERT INTO texto (contenido, tipo, usuario) VALUES (?, ?, ?)"
   const contenido = req.body.contenido;
   const tipo = req.body.tipo;
+  const usuario= req.body.usuario;
 
-  const result = await db.query(sqlQuery, [contenido, tipo])
+  const result = await db.query(sqlQuery, [contenido, tipo, usuario])
   res.status(201).json(result.rows[0]); // 🔥 clave
 
 });
